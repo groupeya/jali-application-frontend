@@ -7,14 +7,11 @@ function App() {
 
   return (
     <>
-    <div className="container">
-      <div className="flex justify-center align-top">
+
           <div className=''>
             <RegisterApplicant />
             {/* <Signup /> */}
-        </div>
-      </div>
-    </div>
+          </div>
 
     </>
   )

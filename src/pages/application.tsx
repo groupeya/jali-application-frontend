@@ -3,6 +3,43 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { RotatingLines } from "react-loader-spinner";
 import Input from "../components/Input";
+import AddressSelectComponent from "../components/AddressSelectComponentProps";
+
+interface FormData {
+  firstname: string;
+  middlename: string;
+  lastname: string;
+  dob: string;
+  phone: string;
+  nid: string;
+  residence: { village_id: number | undefined };
+  place_of_birth: number | undefined;
+  driving_licency: string;
+  status: string;
+  cooperative: string;
+  home_ownership: boolean;
+  monthly_rent: string;
+  rent_duration: string;
+  moto_experience: string;
+  daily_income: string;
+  moto_ownership: string;
+  debts: boolean;
+  loan_payment_process: string;
+  partner_firstname: string;
+  partner_middlename: string;
+  partner_lastname: string;
+  partner_phone: string;
+  partner_nid: string;
+  partner_occupation: string;
+  insurer_one_identity: string;
+  insurer_one_address_id: string;
+  insurer_one_occupation: string;
+  insurer_one_phone: string;
+  insurer_two_identity: string;
+  insurer_two_address_id: string;
+  insurer_two_occupation: string;
+  insurer_two_phone: string;
+}
 
 const RegisterApplicant = () => {
   const BaseUrl = "http://localhost:3000/api/v1";
@@ -18,31 +55,33 @@ const RegisterApplicant = () => {
     TWARAPATANYE = "TWARAPATANYE",
   }
 
-  const addressId = 1;
-  const [formData, setFormData] = useState({
+
+  const [formData, setFormData] = useState<FormData>({
     firstname: "",
     middlename: "",
     lastname: "",
     dob: "",
     phone: "",
     nid: "",
+    residence: { village_id: undefined },
+    place_of_birth: undefined,
     driving_licency: "",
-    address_id: "",
-    residence: "",
-    status: '',
-    partner_firstname: "",
-    partner_middlename: "",
-    partner_lastname: "",
-    partner_phone: "",
-    partner_nid: "",
-    partner_occupation: "",
+    status: "",
     cooperative: "",
     home_ownership: false,
     monthly_rent: "",
     rent_duration: "",
     moto_experience: "",
     daily_income: "",
-    moto_ownership: '',
+    moto_ownership: "",
+    debts: false,
+    loan_payment_process: "",
+    partner_firstname: "",
+    partner_middlename: "",
+    partner_lastname: "",
+    partner_phone: "",
+    partner_nid: "",
+    partner_occupation: "",
     insurer_one_identity: "",
     insurer_one_address_id: "",
     insurer_one_occupation: "",
@@ -51,39 +90,42 @@ const RegisterApplicant = () => {
     insurer_two_address_id: "",
     insurer_two_occupation: "",
     insurer_two_phone: "",
-    debts: false,
-    loan_payment_process: "",
   });
 
-  const [provinces, setProvinces] = useState([]);
-  const [districts, setDistricts] = useState([]);
-  const [sectors, setSectors] = useState([]);
-  const [cells, setCells] = useState([]);
+  // const {
+  //   data: all_province,
+  //   isLoading,
+  //   isError,
+  //   error,
+  // } = useQuery({
+  //   queryKey: ["provinces"],
+  //   queryFn: async () => {
+  //     const response = await axios.get(`${BaseUrl}/provinces`);
+  //     return response.data;
+  //   },
+  // });
 
-  const {
-    data: address,
-    isLoading,
-    isError,
-    error,
-  } = useQuery({
-    queryKey: ["address", addressId],
-    queryFn: async () => {
-      const response = await axios.get(`${BaseUrl}/villages/${addressId}`);
-      return response.data;
-    },
-  });
-  console.log(address)
-  useEffect(() => {
-    if (address) {
-      console.log("Fetched address:", address.cells.sector.district.province.name);
-      setFormData((prevData) => ({
-        ...prevData,
-        address_id: address.id,
-      }));
-    }
-  }, [address]);
+  // const {data: provincesDistricts} = useQuery({
+  //   queryKey: ['districts', selectedProvince],
+  //   queryFn: async() => {
+  //     const response = await axios.get(`${BaseUrl}/provinces/${selectedProvince}/districts`)
+  //     return response.data
+  //   }
+  // })
 
-  
+  // console.log(all_province)
+
+  // console.log(provincesDistricts)
+
+  // useEffect(() => {
+  //   if (address) {
+  //     console.log("Fetched address:", address.cells.sector.district.province.name);
+  //     setFormData((prevData) => ({
+  //       ...prevData,
+  //       address_id: address.id,
+  //     }));
+  //   }
+  // }, [address]);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -94,6 +136,23 @@ const RegisterApplicant = () => {
       [name]: type === "checkbox" ? checked : value,
     });
   };
+
+  const handleResidenceSelect = (addressId: number) => {
+    setFormData((prev) => ({
+      ...prev,
+      residence: { village_id: addressId },
+    }));
+  };
+
+
+
+  const handlePlaceOfBirthSelect = (addressId: number) => {
+    setFormData((prev) => ({
+      ...prev,
+      place_of_birth: addressId,
+    }));
+  };
+
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -149,22 +208,20 @@ const RegisterApplicant = () => {
                 value={formData.nid}
                 handleChange={handleChange}
               />
-              <Input
-                label="Aho yatangiwe"
-                name="address_id"
-                value={formData.address_id}
-                handleChange={handleChange}
-              />
+            <AddressSelectComponent
+              onAddressSelect={handleResidenceSelect}
+              label="Residence"
+              apiUrl={`${BaseUrl}/provinces`}
+            />
+            <AddressSelectComponent
+              onAddressSelect={handlePlaceOfBirthSelect}
+              label="Place of Birth"
+              apiUrl={`${BaseUrl}/provinces`}
+            />
               <Input
                 label="Permis yo Gutwara"
                 name="driving_licency"
                 value={formData.driving_licency}
-                handleChange={handleChange}
-              />
-              <Input
-                label="Aho utuye"
-                name="residence"
-                value={formData.residence}
                 handleChange={handleChange}
               />
               <Input
