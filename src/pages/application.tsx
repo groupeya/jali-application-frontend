@@ -211,12 +211,12 @@ const RegisterApplicant = () => {
             <AddressSelectComponent
               onAddressSelect={handleResidenceSelect}
               label="Residence"
-              apiUrl={`${BaseUrl}/provinces`}
+              apiUrl={`${BaseUrl}`}
             />
             <AddressSelectComponent
               onAddressSelect={handlePlaceOfBirthSelect}
               label="Place of Birth"
-              apiUrl={`${BaseUrl}/provinces`}
+              apiUrl={`${BaseUrl}`}
             />
               <Input
                 label="Permis yo Gutwara"
