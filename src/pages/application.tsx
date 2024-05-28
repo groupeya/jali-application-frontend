@@ -3,6 +3,7 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { RotatingLines } from "react-loader-spinner";
 import Input from "../components/Input";
+import DatePicker from "react-datepicker";
 import AddressSelectComponent from "../components/AddressSelectComponentProps";
 
 interface FormData {
@@ -25,20 +26,24 @@ interface FormData {
   moto_ownership: string;
   debts: boolean;
   loan_payment_process: string;
-  partner_firstname: string;
-  partner_middlename: string;
-  partner_lastname: string;
-  partner_phone: string;
-  partner_nid: string;
-  partner_occupation: string;
-  insurer_one_identity: string;
-  insurer_one_address_id: string;
-  insurer_one_occupation: string;
-  insurer_one_phone: string;
-  insurer_two_identity: string;
-  insurer_two_address_id: string;
-  insurer_two_occupation: string;
-  insurer_two_phone: string;
+  partner: {
+    firstname: string;
+    middlename: string;
+    lastname: string;
+    phone: string;
+    nid: string;
+    occupation: string;
+  };
+  insurer_one: {
+    identity: string;
+    occupation: string;
+    phone: string;
+  };
+  insurer_two: {
+    identity: string;
+    occupation: string;
+    phone: string;
+  };
 }
 
 const RegisterApplicant = () => {
@@ -72,69 +77,53 @@ const RegisterApplicant = () => {
     monthly_rent: "",
     rent_duration: "",
     moto_experience: "",
-    daily_income: "",
+    daily_income: '',
     moto_ownership: "",
     debts: false,
     loan_payment_process: "",
-    partner_firstname: "",
-    partner_middlename: "",
-    partner_lastname: "",
-    partner_phone: "",
-    partner_nid: "",
-    partner_occupation: "",
-    insurer_one_identity: "",
-    insurer_one_address_id: "",
-    insurer_one_occupation: "",
-    insurer_one_phone: "",
-    insurer_two_identity: "",
-    insurer_two_address_id: "",
-    insurer_two_occupation: "",
-    insurer_two_phone: "",
+    partner: {
+      firstname: "",
+      middlename: "",
+      lastname: "",
+      phone: "",
+      nid: "",
+      occupation: "",
+    },
+    insurer_one: {
+      identity: "",
+      occupation: "",
+      phone: ""
+    },
+    insurer_two: {
+      identity: "",
+      occupation: "",
+      phone: ""
+    }
   });
-
-  // const {
-  //   data: all_province,
-  //   isLoading,
-  //   isError,
-  //   error,
-  // } = useQuery({
-  //   queryKey: ["provinces"],
-  //   queryFn: async () => {
-  //     const response = await axios.get(`${BaseUrl}/provinces`);
-  //     return response.data;
-  //   },
-  // });
-
-  // const {data: provincesDistricts} = useQuery({
-  //   queryKey: ['districts', selectedProvince],
-  //   queryFn: async() => {
-  //     const response = await axios.get(`${BaseUrl}/provinces/${selectedProvince}/districts`)
-  //     return response.data
-  //   }
-  // })
-
-  // console.log(all_province)
-
-  // console.log(provincesDistricts)
-
-  // useEffect(() => {
-  //   if (address) {
-  //     console.log("Fetched address:", address.cells.sector.district.province.name);
-  //     setFormData((prevData) => ({
-  //       ...prevData,
-  //       address_id: address.id,
-  //     }));
-  //   }
-  // }, [address]);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
+
     const { name, value, type, checked } = e.target;
-    setFormData({
-      ...formData,
-      [name]: type === "checkbox" ? checked : value,
-    });
+    const newValue = type === "checkbox" ? checked : value;
+
+    // Handle nested fields
+    if (name.includes(".")) {
+      const [parent, child] = name.split(".");
+      setFormData((prev) => ({
+        ...prev,
+        [parent]: {
+          ...(prev[parent as keyof typeof formData] as object),
+          [child]: newValue,
+        },
+      }));
+    } else {
+      setFormData((prev) => ({
+        ...prev,
+        [name]: newValue,
+      }));
+    }
   };
 
   const handleResidenceSelect = (addressId: number) => {
@@ -144,8 +133,6 @@ const RegisterApplicant = () => {
     }));
   };
 
-
-
   const handlePlaceOfBirthSelect = (addressId: number) => {
     setFormData((prev) => ({
       ...prev,
@@ -153,10 +140,23 @@ const RegisterApplicant = () => {
     }));
   };
 
+  console.log(formData)
+
+  const mutation = useMutation({
+    mutationFn: async(newApplication: FormData) => {
+      return await axios.post(`${BaseUrl}/application/register/`, newApplication);
+    },
+    onSuccess: () => {
+      alert("Application submitted successfully!");
+    },
+    onError: (error: any) => {
+      alert(`An error occurred: ${error.message}`);
+    },
+  });
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-
+    mutation.mutate(formData);
   };
 
   return (
@@ -266,7 +266,8 @@ const RegisterApplicant = () => {
                   <Input
                     label="Amafaranga winjiza ku munsi?"
                     name="daily_income"
-                    value={formData.daily_income}
+                    type='number'
+                    value={parseFloat(formData.daily_income)}
                     handleChange={handleChange}
                   />
                   <Input
@@ -294,103 +295,92 @@ const RegisterApplicant = () => {
                     <div className="text-blue-900 bg-white block font-bold text-xl md:text-left mb-9 p-6 rounded">
                       <h1>Umwirondoro w'uwo mwashakanye(Simbuka niba uri ingaragu)</h1>
                 </div>
-                <Input
-                  label="Izina bwite ry'uwo mwashakanye (Simbuka niba iri ingaragu)"
-                  name="partner_firstname"
-                  value={formData.partner_firstname}
-                  handleChange={handleChange}
-                />
-                <Input
-                  label="Izina ryo hagati ry'uwo mwashakanye"
-                  name="partner_middlename"
-                  value={formData.partner_middlename}
-                  handleChange={handleChange}
-                />
-                <Input
-                  label="Irindi zina ry'uwo mwashakanye"
-                  name="partner_lastname"
-                  value={formData.partner_lastname}
-                  handleChange={handleChange}
-                />
-                <Input
-                  label="Numero ya telephone"
-                  name="partner_phone"
-                  value={formData.partner_phone}
-                  handleChange={handleChange}
-                />
-                <Input
-                  label="Irangamuntu"
-                  name="partner_nid"
-                  value={formData.partner_nid}
-                  handleChange={handleChange}
-                />
-                <Input
-                  label="Icyo akora"
-                  name="partner_occupation"
-                  value={formData.partner_occupation}
-                  handleChange={handleChange}
-                />
+              <Input
+                label="Izina bwite ry'uwo mwashakanye (Simbuka niba iri ingaragu)"
+                name="partner.firstname"
+                value={formData.partner.firstname}
+                handleChange={handleChange}
+              />
+              <Input
+                label="Izina ryo hagati ry'uwo mwashakanye"
+                name="partner.middlename"
+                value={formData.partner.middlename}
+                handleChange={handleChange}
+              />
+              <Input
+                label="Irindi zina ry'uwo mwashakanye"
+                name="partner.lastname"
+                value={formData.partner.lastname}
+                handleChange={handleChange}
+              />
+              <Input
+                label="Numero ya telephone"
+                name="partner.phone"
+                value={formData.partner.phone}
+                handleChange={handleChange}
+              />
+              <Input
+                label="Irangamuntu"
+                name="partner.nid"
+                value={formData.partner.nid}
+                handleChange={handleChange}
+              />
+              <Input
+                label="Icyo akora"
+                name="partner.occupation"
+                value={formData.partner.occupation}
+                handleChange={handleChange}
+              />
               </div>
 
               <div className="p-9 m-9 border rounded-xl">
                     <div className="text-blue-900 bg-white block font-bold text-xl md:text-left mb-9 p-6 rounded">
                   Umwirondoro w'umwishingizi wa mbere
                 </div>
+              <Input
+                label="Ikumuranga"
+                name="insurer_one.identity"
+                value={formData.insurer_one.identity}
+                handleChange={handleChange}
+              />
                 <Input
-                  label="Insurer One Identity"
-                  name="insurer_one_identity"
-                  value={formData.insurer_one_identity}
+                  label="Icyo akora"
+                  name="insurer_one.occupation"
+                  value={formData.insurer_one.occupation}
                   handleChange={handleChange}
                 />
                 <Input
-                  label="Insurer One Address ID"
-                  name="insurer_one_address_id"
-                  value={formData.insurer_one_address_id}
-                  handleChange={handleChange}
-                />
-                <Input
-                  label="Insurer One Occupation"
-                  name="insurer_one_occupation"
-                  value={formData.insurer_one_occupation}
-                  handleChange={handleChange}
-                />
-                <Input
-                  label="Insurer One Phone"
-                  name="insurer_one_phone"
-                  value={formData.insurer_one_phone}
+                  label="Telephone"
+                  name="insurer_one.phone"
+                  value={formData.insurer_one.phone}
                   handleChange={handleChange}
                 />
               </div>
                   <div className="p-9 m-9 border rounded-xl">
                     <div className="text-blue-900 bg-white block font-bold text-xl md:text-left mb-9 p-6 rounded">
-                      Umwirondoro w'umwishingizi wa mbere
+                      Umwirondoro w'umwishingizi wa kabiri
                     </div>
                     <Input
-                      label="Insurer Two Identity"
-                      name="insurer_two_identity"
-                      value={formData.insurer_two_identity}
+                      label="Ikumuranga"
+                      name="insurer_two.identity"
+                      value={formData.insurer_two.identity}
+
+                      handleChange={handleChange}
+                    />
+
+                    <Input
+                      label="Icyo akora"
+                      name="insurer_two.occupation"
+                      value={formData.insurer_two.occupation}
                       handleChange={handleChange}
                     />
                     <Input
-                      label="Insurer Two Address ID"
-                      name="insurer_two_address_id"
-                      value={formData.insurer_two_address_id}
-                      handleChange={handleChange}
-                    />
-                    <Input
-                      label="Insurer Two Occupation"
-                      name="insurer_two_occupation"
-                      value={formData.insurer_two_occupation}
-                      handleChange={handleChange}
-                    />
-                    <Input
-                      label="Insurer Two Phone"
-                      name="insurer_two_phone"
-                      value={formData.insurer_two_phone}
+                      label="Telephone"
+                      name="insurer_two.phone"
+                      value={formData.insurer_two.phone}
                       handleChange={handleChange}
                     />
               </div>
-
             </div>
             <button
               type="submit"

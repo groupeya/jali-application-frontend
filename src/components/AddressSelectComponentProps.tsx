@@ -139,9 +139,11 @@ const AddressSelectComponent: React.FC<AddressSelectComponentProps> = ({
 
   return (
     <div>
-      <label>{label}</label>
-      <select onChange={handleProvinceChange} disabled={provinceLoading}>
-        <option value="">Select Province</option>
+      <label className="text-white font-bold md:text-right mb-1 md:mb-0 pr-4">{label}</label>
+      <select onChange={handleProvinceChange} disabled={provinceLoading}
+        className="bg-gray-200 appearance-none border-2 border-gray-200 rounded py-2 px-4 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-red-700"
+      >
+        <option value="">Hitamo Intara</option>
         {provinces && provinces.map((province: { id: number; name: string }) => (
           <option key={province.id} value={province.id}>
             {province.name}
@@ -149,7 +151,9 @@ const AddressSelectComponent: React.FC<AddressSelectComponentProps> = ({
         ))}
       </select>
       {selectedProvince !== null && (
-        <select onChange={handleDistrictChange} disabled={districtLoading}>
+        <select onChange={handleDistrictChange} disabled={districtLoading}
+          className="bg-gray-200 appearance-none border-2 border-gray-200 rounded py-2 px-4 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-red-700"
+        >
           <option value="">Select District</option>
           {districtsData && districtsData.districts.map((district: { id: number; name: string }) => (
             <option key={district.id} value={district.id}>
@@ -159,7 +163,9 @@ const AddressSelectComponent: React.FC<AddressSelectComponentProps> = ({
         </select>
       )}
       {selectedDistrict !== null && (
-        <select onChange={handleSectorChange} disabled={sectorLoading}>
+        <select onChange={handleSectorChange} disabled={sectorLoading}
+          className="bg-gray-200 appearance-none border-2 border-gray-200 rounded py-2 px-4 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-red-700"
+        >
           <option value="">Select Sector</option>
           {sectorsData &&
             sectorsData.sectors.map((sector: { id: number; name: string }) => (
@@ -170,7 +176,9 @@ const AddressSelectComponent: React.FC<AddressSelectComponentProps> = ({
         </select>
       )}
       {selectedSector !== null && (
-        <select onChange={handleCellhange} disabled={cellLoading}>
+        <select onChange={handleCellhange} disabled={cellLoading}
+          className="bg-gray-200 appearance-none border-2 border-gray-200 rounded py-2 px-4 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-red-700"
+        >
           <option value="">Select Cell</option>
           {cellsData &&
             cellsData.cells.map((cell: { id: number; name: string }) => (
@@ -181,7 +189,9 @@ const AddressSelectComponent: React.FC<AddressSelectComponentProps> = ({
         </select>
       )}
       {selectedCell !== null && (
-        <select onChange={handleVillageChange} disabled={villageLoading}>
+        <select onChange={handleVillageChange} disabled={villageLoading}
+          className="bg-gray-200 appearance-none border-2 border-gray-200 rounded py-2 px-4 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-red-700"
+        >
           <option value="">Select Village</option>
           {villagesData &&
             villagesData.villages.map((village: { id: number; name: string }) => (
