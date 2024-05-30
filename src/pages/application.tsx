@@ -167,7 +167,7 @@ const RegisterApplicant = () => {
     setSelectedMotoId(selectedMotoId);
     setFormData((prev) => ({
       ...prev,
-      moto_id: selectedMotoId.toString(),
+      moto_id: selectedMotoId,
     }));
   };
 
@@ -318,7 +318,7 @@ const RegisterApplicant = () => {
               label="Amafaranga winjiza ku munsi?"
               name="daily_income"
               type='number'
-              value={parseFloat(formData.daily_income)}
+              value={formData.daily_income}
               handleChange={handleChange}
             />
             <Input
