@@ -51,6 +51,12 @@ const fetchVillages = async (cellId: number, apiUrl: string) => {
   return response.json();
 };
 
+// const fetchMotoById = async(moto_id: number, apiUrl: string) => {
+//   const response = await fetch(`${apiUrl}/api/motoleasing/${moto_id}/motos`)
+//   if (!response.ok) throw new Error("Network response was not ok");
+//   return response.json()
+// }
+
 
 const AddressSelectComponent: React.FC<AddressSelectComponentProps> = ({
   onAddressSelect,
@@ -61,7 +67,8 @@ const AddressSelectComponent: React.FC<AddressSelectComponentProps> = ({
   const [selectedDistrict, setSelectedDistricts] = useState<number | null>(null);
   const [selectedSector, setSelectedSector] = useState<number | null>(null)
   const [selectedCell, setSelectedCell] = useState<number | null>(null);
-  const [selectedVillage, setSelectedVillage] = useState<number | null>(null);
+  const [ setSelectedVillage] = useState<number | null>(null);
+  // const [selectedMotoId, setSelectedMotoId] = useState<number | null>(null);
 
   const { data: provinces, error: provinceError, isLoading: provinceLoading } = useQuery({
     queryKey: ['provinces'],
@@ -78,8 +85,17 @@ const AddressSelectComponent: React.FC<AddressSelectComponentProps> = ({
         : Promise.resolve({ districts: [] }),
     enabled: !!selectedProvince,
   });
+
+  // const { data: motos, error: motoError, isLoading: motoLoading } = useQuery({
+  //   queryKey: ['motos', selectedMotoId],
+  //   queryFn: () => (selectedMotoId !== null ? fetchMotoById(selectedMotoId, apiUrl) : Promise.resolve(null)),
+  //   enabled: selectedMotoId !== null,
+  // });
+
+  //console.log(motos)
+
   console.log(districtsData)
-  const { data: sectorsData, error: sectorsError, isLoading: sectorLoading } = useQuery({
+  const { data: sectorsData, isLoading: sectorLoading } = useQuery({
     queryKey: ["sectors", selectedDistrict],
     queryFn: () =>
       selectedDistrict
@@ -88,7 +104,7 @@ const AddressSelectComponent: React.FC<AddressSelectComponentProps> = ({
     enabled: !!selectedDistrict,
   });
 
-  const { data: cellsData, error: cellsError, isLoading: cellLoading } = useQuery({
+  const { data: cellsData, isLoading: cellLoading } = useQuery({
     queryKey: ['cells', selectedSector],
     queryFn: () =>
       selectedSector
@@ -97,7 +113,7 @@ const AddressSelectComponent: React.FC<AddressSelectComponentProps> = ({
     enabled: !!selectedSector,
   });
 
-  const { data: villagesData, error: villagesError, isLoading: villageLoading } = useQuery({
+  const { data: villagesData, isLoading: villageLoading } = useQuery({
     queryKey: ["villages", selectedCell],
     queryFn: () =>
       selectedCell
@@ -105,13 +121,14 @@ const AddressSelectComponent: React.FC<AddressSelectComponentProps> = ({
         : Promise.resolve({ villages: [] }),
     enabled: !!selectedCell,
   });
- console.log(cellsData)
 
   const handleProvinceChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const selectedId = parseInt(e.target.value, 10);
     setSelectedProvince(selectedId);
     onAddressSelect(selectedId);
   };
+
+
 
   const handleDistrictChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const selectedId = parseInt(e.target.value, 10);
@@ -137,72 +154,95 @@ const AddressSelectComponent: React.FC<AddressSelectComponentProps> = ({
     onAddressSelect(selectedId);
   };
 
+  // const handleMotoChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+  //   const selectedId = parseInt(e.target.value, 10);
+  //   setSelectedMotoId(selectedId);
+  //   onAddressSelect(selectedId);
+  // };
+
   return (
-    <div>
-      <label className="text-white font-bold md:text-right mb-1 md:mb-0 pr-4">{label}</label>
-      <select onChange={handleProvinceChange} disabled={provinceLoading}
-        className="bg-gray-200 appearance-none border-2 border-gray-200 rounded py-2 px-4 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-red-700"
-      >
-        <option value="">Hitamo Intara</option>
-        {provinces && provinces.map((province: { id: number; name: string }) => (
-          <option key={province.id} value={province.id}>
-            {province.name}
-          </option>
-        ))}
-      </select>
-      {selectedProvince !== null && (
-        <select onChange={handleDistrictChange} disabled={districtLoading}
-          className="bg-gray-200 appearance-none border-2 border-gray-200 rounded py-2 px-4 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-red-700"
+    <div className="p-4 border">
+      <label className=" text-gray-700 font-bold mb-2">{label}</label>
+      <div className="mb-4">
+        <select onChange={handleProvinceChange} disabled={provinceLoading}
+          className="block appearance-none w-full bg-gray-200 border border-gray-200 text-gray-700 py-3 px-4 pr-8 rounded leading-tight focus:outline-none focus:bg-white focus:border-gray-500" id="grid-state"
         >
-          <option value="">Select District</option>
-          {districtsData && districtsData.districts.map((district: { id: number; name: string }) => (
-            <option key={district.id} value={district.id}>
-              {district.name}
+          <option value="">Hitamo Intara</option>
+          {provinces && provinces.map((province: { id: number; name: string }) => (
+            <option key={province.id} value={province.id}>
+              {province.name}
             </option>
           ))}
         </select>
+      </div>
+
+      {selectedProvince !== null && (
+        <div className="mb-4">
+          <select onChange={handleDistrictChange} disabled={districtLoading}
+            className="block appearance-none w-full bg-gray-200 border border-gray-200 text-gray-700 py-3 px-4 pr-8 rounded leading-tight focus:outline-none focus:bg-white focus:border-gray-500" id="grid-state"
+          >
+            <option value="">Hitamo Akarere</option>
+            {districtsData && districtsData.districts.map((district: { id: number; name: string }) => (
+              <option key={district.id} value={district.id}>
+                {district.name}
+              </option>
+            ))}
+          </select>
+        </div>
       )}
       {selectedDistrict !== null && (
-        <select onChange={handleSectorChange} disabled={sectorLoading}
-          className="bg-gray-200 appearance-none border-2 border-gray-200 rounded py-2 px-4 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-red-700"
-        >
-          <option value="">Select Sector</option>
-          {sectorsData &&
-            sectorsData.sectors.map((sector: { id: number; name: string }) => (
-              <option key={sector.id} value={sector.id}>
-                {sector.name}
-              </option>
-            ))}
-        </select>
+        <div className="mb-4">
+          <select onChange={handleSectorChange} disabled={sectorLoading}
+            className="block appearance-none w-full bg-gray-200 border border-gray-200 text-gray-700 py-3 px-4 pr-8 rounded leading-tight focus:outline-none focus:bg-white focus:border-gray-500" id="grid-state"
+          >
+            <option value="">Hitamo Umurenge</option>
+            {sectorsData &&
+              sectorsData.sectors.map((sector: { id: number; name: string }) => (
+                <option key={sector.id} value={sector.id}>
+                  {sector.name}
+                </option>
+              ))}
+          </select>
+        </div>
+
       )}
       {selectedSector !== null && (
-        <select onChange={handleCellhange} disabled={cellLoading}
-          className="bg-gray-200 appearance-none border-2 border-gray-200 rounded py-2 px-4 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-red-700"
-        >
-          <option value="">Select Cell</option>
-          {cellsData &&
-            cellsData.cells.map((cell: { id: number; name: string }) => (
-              <option key={cell.id} value={cell.id}>
-                {cell.name}
-              </option>
-            ))}
-        </select>
+        <div className="mb-4">
+          <select onChange={handleCellhange} disabled={cellLoading}
+            className="block appearance-none w-full bg-gray-200 border border-gray-200 text-gray-700 py-3 px-4 pr-8 rounded leading-tight focus:outline-none focus:bg-white focus:border-gray-500" id="grid-state"
+          >
+            <option value="">Hitamo Akagali</option>
+            {cellsData &&
+              cellsData.cells.map((cell: { id: number; name: string }) => (
+                <option key={cell.id} value={cell.id}>
+                  {cell.name}
+                </option>
+              ))}
+          </select>
+        </div>
+
       )}
       {selectedCell !== null && (
-        <select onChange={handleVillageChange} disabled={villageLoading}
-          className="bg-gray-200 appearance-none border-2 border-gray-200 rounded py-2 px-4 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-red-700"
-        >
-          <option value="">Select Village</option>
-          {villagesData &&
-            villagesData.villages.map((village: { id: number; name: string }) => (
-              <option key={village.id} value={village.id}>
-                {village.name}
-              </option>
-            ))}
-        </select>
+        <div className="mb-4">
+          <select onChange={handleVillageChange} disabled={villageLoading}
+            className="block appearance-none w-full bg-gray-200 border border-gray-200 text-gray-700 py-3 px-4 pr-8 rounded leading-tight focus:outline-none focus:bg-white focus:border-gray-500" id="grid-state"
+          >
+            <option value="">Hitamo Umudugudu</option>
+            {villagesData &&
+              villagesData.villages.map((village: { id: number; name: string }) => (
+                <option key={village.id} value={village.id}>
+                  {village.name}
+                </option>
+              ))}
+          </select>
+        </div>
       )}
       {provinceError && <p>Error fetching provinces: {provinceError.message}</p>}
       {districtError && <p>Error fetching districts: {districtError.message}</p>}
+      {/* {sectorError && <p>Error fetching sectors: {sectorError.message}</p>}
+      {cellError && <p>Error fetching cells: {cellError.message}</p>}
+      {villageError && <p>Error fetching villages: {villageError.message}</p>}
+      {motoError && <p>Error fetching motos: {motoError.message}</p>} */}
     </div>
   );
 };
