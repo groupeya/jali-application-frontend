@@ -1,12 +1,13 @@
 import axios from "axios";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
-import { RotatingLines } from "react-loader-spinner";
+//import { useEffect, useState } from "react";
+// import { RotatingLines } from "react-loader-spinner";
 import Input from "../components/Input";
 
 
 
 import AddressSelectComponent from "../components/AddressSelectComponentProps";
+import { useState } from "react";
 interface FormData {
   firstname: string;
   middlename: string;
@@ -20,13 +21,13 @@ interface FormData {
 
   status: string;
   cooperative: string;
-  home_ownership: boolean;
-  monthly_rent: string;
+  home_ownership: undefined;
+  monthly_rent: number | null;
   rent_duration: string;
   moto_experience: string;
-  daily_income: string;
+  daily_income: number | null;
   moto_ownership: string;
-  debts: boolean;
+  debts: undefined;
   loan_payment_process: string;
   moto_id: number | string;
   partner: {
@@ -47,13 +48,13 @@ interface FormData {
     occupation: string;
     phone: string;
   };
-  files: [];
+  files: File[];
 }
 
 
 
 const RegisterApplicant = () => {
-  const BaseUrl = "http://159.223.111.104:7800/api/v1";
+  const BaseUrl = "http://localhost:7800/api/v1";
 
   const fetchMotos = async () => {
     const response = await fetch(`${BaseUrl}/motoleasing`)
@@ -72,8 +73,13 @@ const RegisterApplicant = () => {
     TWARAPATANYE = "TWARAPATANYE",
   }
 
-  const [selectedMotoId, setSelectedMotoId] = useState<number | null>(null);
+  enum KEMEZA_GUHAKANA {
+    YEGO="YEGO",
+    OYA="OYA"
+  }
 
+  const [selectedMotoId, setSelectedMotoId] = useState<number | null>(null);
+  //const [, setSelectedKinya] = useState<boolean | undefined>();
   const [formData, setFormData] = useState<FormData>({
     firstname: "",
     middlename: "",
@@ -86,14 +92,14 @@ const RegisterApplicant = () => {
     driving_licency: "",
     status: "",
     cooperative: "",
-    home_ownership: false,
-    monthly_rent: "",
+    home_ownership: undefined,
+    monthly_rent: null,
     rent_duration: "",
     moto_experience: "",
-    daily_income: '',
+    daily_income: null,
     moto_ownership: "",
-    debts: false,
-    loan_payment_process: "",
+    debts: undefined,
+    loan_payment_process: "Buri Cyumweru",
     moto_id: "",
     partner: {
       firstname: "",
@@ -172,16 +178,41 @@ const RegisterApplicant = () => {
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files) {
+    const files = e.target.files;
+    if (files && files.length > 0) {
       setFormData((prev) => ({
         ...prev,
-        files: Array.from(e.target.files).map((file) => ({
-          originalname: file.name,
-          buffer: file
-        }))
+        files: Array.from(files)
       }));
     }
   };
+
+  const handleBooleanKinyarwanda = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
+    fieldName: "home_ownership" | "debts"
+  ) => {
+    const value = e.target.value;
+    const booleanValue = value === KEMEZA_GUHAKANA.YEGO;
+
+    setFormData((prev) => ({
+      ...prev,
+      [fieldName]: booleanValue,
+    }));
+  };
+
+  // const handleBooleanKinyarwanda = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  //   const value = e.target.value;
+  //   if (value === KEMEZA_GUHAKANA.YEGO) {
+  //     setSelectedKinya(true);
+  //   } else if (value === KEMEZA_GUHAKANA.OYA) {
+  //     setSelectedKinya(false);
+  //   }
+  //   // Update formData if necessary
+  //   setFormData((prev) => ({
+  //     ...prev,
+  //     debts: value === KEMEZA_GUHAKANA.YEGO
+  //   }));
+  // };
 
   console.log(formData)
 
@@ -257,7 +288,6 @@ const RegisterApplicant = () => {
                   onAddressSelect={handleResidenceSelect}
                   label="Aho utuye"
                   apiUrl={`${BaseUrl}`}
-
                 />
               </div>
               <div className="m-3">
@@ -282,31 +312,42 @@ const RegisterApplicant = () => {
               handleChange={handleChange}
               options={Object.values(STATUS)}
             />
-
             <Input
               label="Koperative"
               name="cooperative"
               value={formData.cooperative}
               handleChange={handleChange}
             />
-            <Input
+            {/* <Input
               label="Inzu mutuyemo niyanyu"
               name="home_ownership"
-              value={formData.home_ownership}
-              type="checkbox"
-              handleChange={handleChange}
+              value={formData.home_ownership ? KEMEZA_GUHAKANA.YEGO : KEMEZA_GUHAKANA.OYA}
+              type="select"
+              handleChange={handleBooleanKinyarwanda}
+              options={Object.values(KEMEZA_GUHAKANA)}
+            /> */}
+            <Input
+              label="Inzu mutuyemo niyanyu?"
+              name="home_ownership"
+              value={formData.home_ownership ? KEMEZA_GUHAKANA.YEGO : KEMEZA_GUHAKANA.OYA}
+              type="select"
+              handleChange={(e) => handleBooleanKinyarwanda(e, 'home_ownership')}
+              options={Object.values(KEMEZA_GUHAKANA)}
             />
             <Input
               label="Niba mukodesha, mwishura angahe?"
               name="monthly_rent"
-              value={formData.monthly_rent}
+              type="number"
+              value={formData.monthly_rent?.toString() ?? ""}
               handleChange={handleChange}
             />
+
             <Input
-              label="Muyumazemo igihe kingana iki?"
+              label="Muyimazemo igihe kingana iki?"
               name="rent_duration"
               value={formData.rent_duration}
               handleChange={handleChange}
+
             />
             <Input
               label="Umaze igihe kingana iki mu Kimotari?"
@@ -318,7 +359,7 @@ const RegisterApplicant = () => {
               label="Amafaranga winjiza ku munsi?"
               name="daily_income"
               type='number'
-              value={formData.daily_income}
+              value={formData.daily_income?.toString() ?? ""}
               handleChange={handleChange}
             />
             <Input
@@ -332,9 +373,10 @@ const RegisterApplicant = () => {
             <Input
               label="Hari imyenda mufite?"
               name="debts"
-              value={formData.debts}
-              type="checkbox"
-              handleChange={handleChange}
+              value={formData.debts ? KEMEZA_GUHAKANA.YEGO : KEMEZA_GUHAKANA.OYA}
+              type="select"
+              handleChange={(e) => handleBooleanKinyarwanda(e, 'debts')}
+              options={Object.values(KEMEZA_GUHAKANA)}
             />
             <div className="mb-4">
               <select onChange={handleMotoSelect}
@@ -349,10 +391,11 @@ const RegisterApplicant = () => {
               </select>
             </div>
             <Input
-              label="Loan Payment Process"
+              label="Uzishyura mubihe buryo"
               name="loan_payment_process"
               value={formData.loan_payment_process}
               handleChange={handleChange}
+              disabled={true}
             />
             <div className="p-9 m-9 border rounded-xl">
               <div className="text-blue-900 bg-white block font-bold text-xl md:text-left mb-9 p-6 rounded">
@@ -445,7 +488,14 @@ const RegisterApplicant = () => {
               />
 
             </div>
-            <Input label="Shyiramo ishusho y'irangamuntu na permit" type="file" multiple onChange={handleFileChange} className="m-5"/>
+            <label htmlFor="files" className="block font-bold md:text-center mb-1 md:mb-0 pr-4">Injiza copy y'Irangamuntu na perimi</label>
+            <input
+              type="file"
+              name = 'files'
+              multiple
+              onChange={handleFileChange}
+              className="m-5 appearance-none border-2 border-blue-900 rounded w-full py-2 px-4 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-blue-600"
+            />
           </div>
           {/* <button
               type="submit"
@@ -459,6 +509,7 @@ const RegisterApplicant = () => {
         {mutation.isError && <p className='w-full text-red-500 font-light text-lg text-center'> Ntibyakunze kwiyandikiza uzuza neza
         </p>}
         {mutation.isSuccess && <p className="w-full text-green-300 text-lg font-light text-center">Kwiyandikisha byakunze</p>}
+
       </div>
     </div>
   );

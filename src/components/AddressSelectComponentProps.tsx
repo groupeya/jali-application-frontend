@@ -67,7 +67,7 @@ const AddressSelectComponent: React.FC<AddressSelectComponentProps> = ({
   const [selectedDistrict, setSelectedDistricts] = useState<number | null>(null);
   const [selectedSector, setSelectedSector] = useState<number | null>(null)
   const [selectedCell, setSelectedCell] = useState<number | null>(null);
-  const [ setSelectedVillage] = useState<number | null>(null);
+  //const [setSelectedVillage] = useState<number | null>(null);
   // const [selectedMotoId, setSelectedMotoId] = useState<number | null>(null);
 
   const { data: provinces, error: provinceError, isLoading: provinceLoading } = useQuery({
@@ -150,7 +150,7 @@ const AddressSelectComponent: React.FC<AddressSelectComponentProps> = ({
 
   const handleVillageChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const selectedId = parseInt(e.target.value, 10);
-    setSelectedVillage(selectedId);
+    //setSelectedVillage(selectedId);
     onAddressSelect(selectedId);
   };
 

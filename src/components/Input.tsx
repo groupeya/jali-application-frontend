@@ -6,10 +6,11 @@ interface InputProps {
   value: string | number | boolean;
   type?: string;
   options?: string[]
+  disabled?: boolean;
   handleChange: (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => void;
 }
 
-const Input: React.FC<InputProps> = ({ label, name, value, type = 'text', handleChange, options }) => {
+const Input: React.FC<InputProps> = ({ label, name, value, type = 'text', handleChange, options, disabled }) => {
   return (
     <div className='md:flex md:items-center mb-6'>
       <div className='md:w-1/3'>
@@ -22,9 +23,10 @@ const Input: React.FC<InputProps> = ({ label, name, value, type = 'text', handle
           title={name}
           value={value as string}
           onChange={handleChange}
-          className="bg-gray-200 appearance-none border-2 border-gray-200 rounded text-gray-700 focus:shadow-outline"
+          disabled={disabled}
+          className="ppearance-none border-2 border-blue-900 rounded w-full py-2 px-4 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-blue-600"
         >
-          <option value="" disabled>
+          <option value="" disabled={true} selected={true}>
             Hitamo
           </option>
           {options?.map(option => (
@@ -41,6 +43,7 @@ const Input: React.FC<InputProps> = ({ label, name, value, type = 'text', handle
           checked={Boolean(value)}
           onChange={handleChange}
           className=""
+            disabled={disabled}
         />
       ) : (
         <input
@@ -49,9 +52,10 @@ const Input: React.FC<InputProps> = ({ label, name, value, type = 'text', handle
           title={name}
           value={value as string | number}
           onChange={handleChange}
-          className=" appearance-none border-2 border-blue-900 rounded w-full py-2 px-4 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-blue-600"
+          disabled={disabled}
+          className="appearance-none border-2 border-blue-900 rounded w-full py-2 px-4 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-blue-600"
         />
-      )}
+      ) }
     </div>
   );
 };
