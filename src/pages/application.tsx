@@ -54,7 +54,7 @@ interface FormData {
 
 
 const RegisterApplicant = () => {
-  const BaseUrl = "http://localhost:7800/api/v1";
+  const BaseUrl = "http://159.223.111.104:7800/api/v1";
 
   const fetchMotos = async () => {
     const response = await fetch(`${BaseUrl}/motoleasing`)
