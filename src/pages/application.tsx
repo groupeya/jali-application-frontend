@@ -48,13 +48,16 @@ interface FormData {
     occupation: string;
     phone: string;
   };
-  files: File[];
+  files: FileData[];
 }
 
-
+interface FileData {
+  originalname: string;
+  buffer: ArrayBuffer;
+}
 
 const RegisterApplicant = () => {
-  const BaseUrl = "http://159.223.111.104:7800/api/v1";
+  const BaseUrl = "http://localhost:7800/api/v1";
 
   const fetchMotos = async () => {
     const response = await fetch(`${BaseUrl}/motoleasing`)
@@ -78,8 +81,8 @@ const RegisterApplicant = () => {
     OYA="OYA"
   }
 
-  const [selectedMotoId, setSelectedMotoId] = useState<number | null>(null);
-  //const [, setSelectedKinya] = useState<boolean | undefined>();
+  const [selectedMotoId,] = useState<number | null>(null);
+  // const [,setSelectedKinya] = useState<boolean | undefined>();
   const [formData, setFormData] = useState<FormData>({
     firstname: "",
     middlename: "",
@@ -127,7 +130,6 @@ const RegisterApplicant = () => {
     queryFn: fetchMotos
   });
   console.log(motos)
-
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
@@ -167,22 +169,34 @@ const RegisterApplicant = () => {
       place_of_birth: addressId,
     }));
   };
-
   const handleMotoSelect = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const selectedMotoId = parseInt(e.target.value, 10);
-    setSelectedMotoId(selectedMotoId);
     setFormData((prev) => ({
       ...prev,
       moto_id: selectedMotoId,
     }));
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (files && files.length > 0) {
-      setFormData((prev) => ({
-        ...prev,
-        files: Array.from(files)
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      const filesArray = Array.from(e.target.files);
+      const filesData = await Promise.all(filesArray.map(async (file) => {
+        return new Promise<FileData>((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = () => {
+            resolve({
+              originalname: file.name,
+              buffer: Buffer.from(reader.result as ArrayBuffer),
+            });
+          };
+          reader.onerror = reject;
+          reader.readAsArrayBuffer(file);
+        });
+      }));
+
+      setFormData((prevFormData) => ({
+        ...prevFormData,
+        files: filesData,
       }));
     }
   };
@@ -352,7 +366,7 @@ const RegisterApplicant = () => {
             <Input
               label="Umaze igihe kingana iki mu Kimotari?"
               name="moto_experience"
-              value={formData.moto_experience}
+              value={formData.moto_experience.toString() ?? ""}
               handleChange={handleChange}
             />
             <Input
@@ -383,7 +397,8 @@ const RegisterApplicant = () => {
                 className="block appearance-none w-full bg-gray-200 border border-gray-200 text-gray-700 py-3 px-4 pr-8 rounded leading-tight focus:outline-none focus:bg-white focus:border-gray-500" id="grid-state"
               >
                 <option value="">Hitamo Moto</option>
-                {motos && motos.map((moto: { id: number; type: string }) => (
+                {motos?.map((moto: { id: number, type: string }) => (
+
                   <option key={moto.id} value={moto.id}>
                     {moto.type}
                   </option>
@@ -508,7 +523,7 @@ const RegisterApplicant = () => {
         </form>
         {mutation.isError && <p className='w-full text-red-500 font-light text-lg text-center'> Ntibyakunze kwiyandikiza uzuza neza
         </p>}
-        {mutation.isSuccess && <p className="w-full text-green-300 text-lg font-light text-center">Kwiyandikisha byakunze</p>}
+        {mutation.isSuccess && <p className="w-full text-green-700 text-lg font-light text-center">Kwiyandikisha byakunze neza, tuzabagezaho igisibizo</p>}
 
       </div>
     </div>
